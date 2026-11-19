@@ -32,6 +32,9 @@ function ucretsizSatiri(hasta, islem) {
     el("td", null, islem.doktor || "-"),
     el("td", { className: fiyat === null ? "sayi soluk" : "sayi" }, fiyat === null ? "fiyat yok" : paraGoster(fiyat)),
     el("td", { className: "eylem" },
+      islem.yapildi ? null : el("button", { type: "button", className: "dugme kucuk", title: "Bu işlem için hastayı çağırmayı hatırlat",
+        onclick: () => hatirlaticiPenceresiniAc({ hastaId: hasta.id, islem }) }, "Hatırlatıcı"),
+      " ",
       el("button", { type: "button", className: "dugme kucuk", onclick: () => ucretPenceresiniAc({ hastaId: hasta.id, islem }) }, "Ücretlendir")),
   );
 }
@@ -72,6 +75,13 @@ function hesabiCiz() {
   if (!hasta) return;
   document.getElementById("hesap-basligi").textContent = tamAd(hasta);
   document.getElementById("hesap-hasta-no").textContent = `Hasta No: ${hasta.hastaNo ?? "-"}`;
+  const r = telefonu(hasta.id);
+  document.getElementById("hesap-telefon").replaceChildren(...[
+    r ? el("span", { className: "telefon-numara" }, telefonGoster(r)) : null,
+    whatsappDugmesi(hasta),
+    el("button", { type: "button", className: "dugme kucuk yazdirma-gizli", onclick: () => telefonPenceresiniAc(hasta.id) },
+      r ? "Telefonu düzelt" : "+ Telefon ekle"),
+  ].filter(Boolean));
   document.getElementById("hesap-panel-baglantisi").href = `../#hasta/${hasta.id}`;
   document.getElementById("ekstre-tarihi").textContent = `${tamAd(hasta)} · Hasta No ${hasta.hastaNo ?? "-"} · ${tarihGoster(bugununTarihi())}`;
 
@@ -91,6 +101,8 @@ function hesabiCiz() {
   planOzeti.textContent = `Planlanan ${planlanan.length} işlemin liste fiyatıyla tahmini tutarı: ${paraGoster(toplam(planFiyatlari, (f) => f || 0))}`
     + (planFiyatlari.some((f) => f === null) ? " (fiyatı olmayanlar hariç)" : "");
 
+  hastaHatirlaticilariniCiz(hasta);
+
   tabloyuDoldur(document.getElementById("dokum-satirlari"), document.getElementById("dokum-bos"), dokumSatirlari(hasta));
 }
 
@@ -107,4 +119,5 @@ function hesabiAc(id) {
 
 document.getElementById("ucret-ekle").addEventListener("click", () => ucretPenceresiniAc({ hastaId: acikHesapId }));
 document.getElementById("odeme-al").addEventListener("click", () => odemePenceresiniAc({ hastaId: acikHesapId }));
+document.getElementById("hatirlatici-ekle").addEventListener("click", () => hatirlaticiPenceresiniAc({ hastaId: acikHesapId }));
 document.getElementById("hesap-yazdir").addEventListener("click", () => window.print());

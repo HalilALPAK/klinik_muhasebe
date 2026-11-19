@@ -9,6 +9,7 @@ const uygulamaKabi = document.getElementById("uygulama");
 const EKRANLAR = {
   hastalar: { sayfa: hastalarSayfasi, ciz: hastalariCiz },
   hesap: { sayfa: hesapSayfasi, ciz: hesabiCiz },
+  hatirlaticilar: { sayfa: hatirlaticilarSayfasi, ciz: hatirlaticilariCiz },
   kasa: { sayfa: kasaSayfasi, ciz: kasayiCiz },
   raporlar: { sayfa: raporlarSayfasi, ciz: raporlariCiz },
   fiyatlar: { sayfa: fiyatlarSayfasi, ciz: fiyatlariCiz },
@@ -22,6 +23,7 @@ function ekranGoster(ad) {
   const menu = ad === "hesap" ? "hastalar" : ad;
   document.querySelectorAll(".ana-menu a").forEach((a) => a.classList.toggle("secili", a.dataset.menu === menu));
   EKRANLAR[ad].ciz();
+  hatirlaticiRozetiniGuncelle();
   if (degisti) window.scrollTo(0, 0);
 }
 
@@ -34,7 +36,7 @@ function yonlendir() {
   }
   acikHesapId = null;
   const ad = location.hash.slice(1);
-  ekranGoster(["kasa", "raporlar", "fiyatlar"].includes(ad) ? ad : "hastalar");
+  ekranGoster(["hatirlaticilar", "kasa", "raporlar", "fiyatlar"].includes(ad) ? ad : "hastalar");
 }
 
 // Veri değişince (kendi kaydımız ya da başka bilgisayar) açık ekran yeniden çizilir.
@@ -52,6 +54,7 @@ veriDegistiIsleyicisi = () => {
       return;
     }
     EKRANLAR[acikEkran].ciz();
+    hatirlaticiRozetiniGuncelle();
   });
 };
 
@@ -152,6 +155,14 @@ document.getElementById("cikis-dugmesi").addEventListener("click", () => {
 });
 
 window.addEventListener("hashchange", yonlendir);
+
+// Uygulama gün boyu açık kalır; gün dönünce "bugün"e bağlı ekranlar tazelenir
+let sonGun = bugununTarihi();
+setInterval(() => {
+  if (bugununTarihi() === sonGun) return;
+  sonGun = bugununTarihi();
+  veriDegistiIsleyicisi();
+}, 60 * 1000);
 window.addEventListener("beforeunload", (olay) => {
   if (acikFormDegisti()) olay.preventDefault();
 });

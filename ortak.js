@@ -95,3 +95,44 @@ function tabloyuDoldur(govde, bos, satirlar, bosMetni) {
   bos.hidden = satirlar.length > 0;
   if (bosMetni) bos.textContent = bosMetni;
 }
+
+const IKON_WHATSAPP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 20.5l1.3-4.1A8.6 8.6 0 1 1 8 19.3z"/>'
+  + '<path class="dolgu" d="M9.2 7.4c-.4 0-.8.4-.9.9-.2 1.2.3 2.8 1.7 4.2 1.4 1.4 3 1.9 4.2 1.7.5-.1.9-.5.9-.9v-.6c0-.2-.1-.3-.3-.4l-1.5-.7c-.2-.1-.4 0-.5.1l-.6.7c-.9-.4-1.8-1.3-2.2-2.2l.7-.6c.1-.1.2-.3.1-.5l-.7-1.5c-.1-.2-.2-.3-.4-.3z"/></svg>';
+const IKON_ZIL = ikonSvg("M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0");
+const IKON_ONAY = ikonSvg("M5 12.5l4.5 4.5L19 7.5");
+
+// Hastanın WhatsApp sohbetini yeni sekmede açan düğme.
+// Telefon yoksa gri görünür; tıklanınca telefon girme penceresi açılır.
+function whatsappDugmesi(hasta, mesaj = "") {
+  const r = telefonu(hasta.id);
+  const dugme = r
+    ? el("a", {
+      className: "whatsapp-dugme",
+      title: `${tamAd(hasta)} ile WhatsApp'ta yazış`,
+      "aria-label": `${tamAd(hasta)} ile WhatsApp'ta yazış`,
+      href: whatsappAdresi(r, mesaj),
+      target: "_blank",
+      rel: "noopener noreferrer",
+      onclick: (olay) => olay.stopPropagation(),
+    })
+    : el("button", {
+      type: "button",
+      className: "whatsapp-dugme pasif",
+      title: "Telefon girilmemiş. Eklemek için tıklayın",
+      "aria-label": `${tamAd(hasta)} için telefon ekle`,
+      onclick: (olay) => {
+        olay.stopPropagation();
+        telefonPenceresiniAc(hasta.id);
+      },
+    });
+  dugme.innerHTML = IKON_WHATSAPP;
+  return dugme;
+}
+
+// Tablo hücresi: numara + WhatsApp düğmesi
+function telefonHucresi(hasta, mesaj) {
+  const r = telefonu(hasta.id);
+  return el("td", { className: "telefon-hucresi" },
+    el("span", { className: r ? "" : "soluk" }, r ? telefonGoster(r) : "-"),
+    whatsappDugmesi(hasta, mesaj));
+}

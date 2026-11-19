@@ -6,7 +6,7 @@
  * hastalar tablosu yalnızca okunur: hasta ekleme/düzeltme klinik panelindedir.
  */
 
-const veri = { hastalar: [], tahakkuklar: [], odemeler: [], giderler: [], fiyatlar: [] };
+const veri = { hastalar: [], tahakkuklar: [], odemeler: [], giderler: [], fiyatlar: [], iletisim: [], hatirlaticilar: [] };
 const KOLEKSIYONLAR = Object.keys(veri);
 const SIRALAMA = {
   hastalar: "hastaNo",
@@ -14,6 +14,8 @@ const SIRALAMA = {
   odemeler: "tarih,created",
   giderler: "tarih,created",
   fiyatlar: "tedavi",
+  iletisim: "created",
+  hatirlaticilar: "tarih,created",
 };
 
 const YONTEMLER = { nakit: "Nakit", kart: "Kart", havale: "Havale / EFT" };
@@ -138,3 +140,45 @@ function bilinenDoktorlar() {
   for (const t of veri.tahakkuklar) if (t.doktor) adlar.add(t.doktor);
   return [...adlar].sort((a, b) => a.localeCompare(b, "tr"));
 }
+
+/* Telefon (iletisim tablosu: hasta başına tek kayıt; panelde yok, yalnızca muhasebede girilir) */
+
+const iletisimBul = (hastaId) => veri.iletisim.find((i) => i.hasta === hastaId) || null;
+const telefonu = (hastaId) => iletisimBul(hastaId)?.telefon || "";
+
+/*
+ * Yazılan numarayı uluslararası rakamlara çevirir (wa.me biçimi, + olmadan); geçersizse null, boşsa "".
+ * Türkiye: "0532 123 45 67", "532 123 4567", "+90 532..." → "905321234567".
+ * Başka ülke: "+49 ..." ile yazılır (8–15 rakam).
+ */
+function telefonOku(metin) {
+  const ham = String(metin || "").trim();
+  if (!ham) return "";
+  if (/[^\d\s()+\-./]/.test(ham)) return null;
+  let r = ham.replace(/\D/g, "");
+  if (ham.startsWith("+") || ham.startsWith("00")) {
+    r = r.replace(/^00/, "");
+    if (r.startsWith("90")) return r.length === 12 ? r : null;
+    return r.length >= 8 && r.length <= 15 ? r : null;
+  }
+  if (r.length === 12 && r.startsWith("90")) return r;
+  if (r.length === 11 && r.startsWith("0")) return `9${r}`;
+  if (r.length === 10 && !r.startsWith("0")) return `90${r}`;
+  return null;
+}
+
+// "905321234567" → "0532 123 45 67"; yabancı numara "+49 ..." olarak
+function telefonGoster(r) {
+  if (!r) return "";
+  if (r.length === 12 && r.startsWith("90")) return `0${r.slice(2, 5)} ${r.slice(5, 8)} ${r.slice(8, 10)} ${r.slice(10)}`;
+  return `+${r}`;
+}
+
+const whatsappAdresi = (r, mesaj = "") => `https://wa.me/${r}${mesaj ? `?text=${encodeURIComponent(mesaj)}` : ""}`;
+
+/* Hatırlatıcılar: hastanın tekrar gelmesi gereken işler (kontrol, devam seansı vb.) */
+
+const hastaninHatirlaticilari = (hastaId) => veri.hatirlaticilar.filter((h) => h.hasta === hastaId).sort(tarihSirasi);
+const bekleyenHatirlaticilar = () => veri.hatirlaticilar.filter((h) => !h.tamamlandi);
+// Günü gelmiş ya da geçmiş, tamamlanmamış hatırlatıcı sayısı (menü rozeti)
+const vadesiGelenSayisi = () => bekleyenHatirlaticilar().filter((h) => h.tarih <= bugununTarihi()).length;

@@ -11,19 +11,26 @@ function kalanHucresi(kalan) {
   return el("td", { className: sinif, title: kalan < 0 ? "Fazla ödeme (avans)" : undefined }, paraGoster(kalan));
 }
 
+// Aranan metin rakam içeriyorsa telefonla da eşleştirir ("0532 12" ve "532 12" aynı numarayı bulur)
+function telefonEslesir(hastaId, aranan) {
+  const rakamlar = aranan.replace(/\D/g, "").replace(/^0/, "");
+  return rakamlar.length >= 3 && telefonu(hastaId).includes(rakamlar);
+}
+
 function hastalariCiz() {
   const ozetler = hesapOzetleri();
   const aranan = kucult(hastaArama.value.replace(/\s+/g, " "));
   const gorunen = veri.hastalar
     .map((h) => ({ h, o: ozetler.get(h.id) || BOS_OZET }))
     .filter(({ h, o }) => (!yalnizBorclular.checked || o.kalan > 0)
-      && kucult(`${h.hastaNo} ${tamAd(h)} ${h.tc || ""}`).includes(aranan))
+      && (kucult(`${h.hastaNo} ${tamAd(h)} ${h.tc || ""}`).includes(aranan) || telefonEslesir(h.id, aranan)))
     .sort((a, b) => (yalnizBorclular.checked ? b.o.kalan - a.o.kalan : 0) || tamAd(a.h).localeCompare(tamAd(b.h), "tr"));
 
   const satirlar = gorunen.map(({ h, o }) => el("tr", { onclick: () => { location.hash = `hasta/${h.id}`; } },
     el("td", { className: "soluk" }, String(h.hastaNo ?? "-")),
     el("td", null, el("a", { href: `#hasta/${h.id}` }, tamAd(h))),
     el("td", null, h.tc || "-"),
+    telefonHucresi(h),
     el("td", { className: "sayi" }, paraGoster(o.ucret)),
     el("td", { className: "sayi" }, paraGoster(o.odenen)),
     kalanHucresi(o.kalan),

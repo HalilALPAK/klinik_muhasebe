@@ -51,6 +51,7 @@
       </div>
       <nav class="ana-menu" aria-label="Muhasebe ekranları">
         <a href="#" data-menu="hastalar">Hastalar</a>
+        <a href="#hatirlaticilar" data-menu="hatirlaticilar">Hatırlatıcılar <span id="hatirlatici-rozeti" class="sayi-rozeti" hidden></span></a>
         <a href="#kasa" data-menu="kasa">Kasa / Gider</a>
         <a href="#raporlar" data-menu="raporlar">Raporlar</a>
         <a href="#fiyatlar" data-menu="fiyatlar">Fiyat Listesi</a>
@@ -68,13 +69,13 @@
       <div class="kart">
         <div class="liste-arac">
           <h1>Hasta Hesapları</h1>
-          <input id="hasta-arama" type="search" placeholder="Hasta No, isim, soyisim veya TC ile ara" aria-label="Hasta ara" autocomplete="off">
+          <input id="hasta-arama" type="search" placeholder="Hasta No, isim, soyisim, TC veya telefon ile ara" aria-label="Hasta ara" autocomplete="off">
           <label class="secenek"><input id="yalniz-borclular" type="checkbox"> Yalnızca borçlular</label>
         </div>
         <div class="tablo-kaydirma">
           <table class="tablo tiklanir">
             <thead>
-              <tr><th>Hasta No</th><th>Ad Soyad</th><th>TC Kimlik No</th><th class="sayi">Ücret</th><th class="sayi">Ödenen</th><th class="sayi">Kalan</th></tr>
+              <tr><th>Hasta No</th><th>Ad Soyad</th><th>TC Kimlik No</th><th>Telefon</th><th class="sayi">Ücret</th><th class="sayi">Ödenen</th><th class="sayi">Kalan</th></tr>
             </thead>
             <tbody id="hasta-satirlari"></tbody>
           </table>
@@ -89,6 +90,7 @@
         <a class="dugme yazdirma-gizli" href="#">← Hastalar</a>
         <h1 id="hesap-basligi"></h1>
         <span id="hesap-hasta-no" class="etiket"></span>
+        <span id="hesap-telefon" class="telefon-alani"></span>
         <span class="bosluk"></span>
         <a id="hesap-panel-baglantisi" class="dugme yazdirma-gizli" href="../">Panelde aç</a>
         <button id="hesap-yazdir" class="dugme yazdirma-gizli" type="button">Ekstre Yazdır</button>
@@ -113,6 +115,22 @@
         <p id="plan-ozeti" class="kart-alt" hidden></p>
       </section>
 
+      <section class="kart yazdirma-gizli" aria-labelledby="hasta-hatirlatici-baslik">
+        <div class="kart-baslik">
+          <h2 id="hasta-hatirlatici-baslik">Hatırlatıcılar</h2>
+          <span class="kart-notu">Hastanın kliniğe tekrar gelmesi gereken işler</span>
+          <span class="bosluk"></span>
+          <button id="hatirlatici-ekle" class="dugme" type="button">+ Hatırlatıcı</button>
+        </div>
+        <div class="tablo-kaydirma">
+          <table class="tablo">
+            <thead><tr><th>Tarih</th><th>Konu</th><th>Not</th><th>Durum</th><th><span class="ekran-disi">İşlemler</span></th></tr></thead>
+            <tbody id="hasta-hatirlatici-satirlari"></tbody>
+          </table>
+        </div>
+        <p id="hasta-hatirlatici-bos" class="liste-bos" hidden>Hatırlatıcı yok. Planlanan işlemlerden ya da "+ Hatırlatıcı" ile ekleyin.</p>
+      </section>
+
       <section class="kart" aria-labelledby="dokum-baslik">
         <div class="kart-baslik">
           <h2 id="dokum-baslik">Hesap Dökümü</h2>
@@ -129,6 +147,31 @@
           </table>
         </div>
         <p id="dokum-bos" class="liste-bos" hidden>Bu hastanın hesabında hareket yok.</p>
+      </section>
+    </section>
+
+    <!-- Hatırlatıcılar -->
+    <section id="hatirlaticilar-sayfasi" class="sayfa" hidden>
+      <div class="sayfa-ust">
+        <h1>Hatırlatıcılar</h1>
+        <select id="hatirlatici-suzgeci" aria-label="Hangi hatırlatıcılar">
+          <option value="gelen" selected>Günü gelen ve geçenler</option>
+          <option value="hafta">Önümüzdeki 7 gün</option>
+          <option value="ay">Önümüzdeki 30 gün</option>
+          <option value="acik">Tüm bekleyenler</option>
+          <option value="tamam">Tamamlananlar</option>
+        </select>
+        <input id="hatirlatici-arama" type="search" placeholder="Hasta veya konu ara" aria-label="Hatırlatıcı ara" autocomplete="off">
+      </div>
+      <div class="ozet-kutulari" id="hatirlatici-ozeti"></div>
+      <section class="kart">
+        <div class="tablo-kaydirma">
+          <table class="tablo">
+            <thead><tr><th>Tarih</th><th>Hasta</th><th>Telefon</th><th>Konu</th><th>Not</th><th><span class="ekran-disi">İşlemler</span></th></tr></thead>
+            <tbody id="hatirlatici-satirlari"></tbody>
+          </table>
+        </div>
+        <p id="hatirlatici-bos" class="liste-bos" hidden></p>
       </section>
     </section>
 
@@ -373,6 +416,59 @@
     </form>
   </dialog>
 
+  <dialog id="telefon-penceresi">
+    <form id="telefon-formu" class="bilgi-formu" novalidate>
+      <h2>Telefon</h2>
+      <p class="form-notu">Telefon yalnızca muhasebede tutulur; klinik panelinde görünmez.</p>
+      <div class="alanlar">
+        <label>Cep telefonu
+          <input name="telefon" type="tel" autocomplete="off" placeholder="0532 123 45 67">
+        </label>
+        <p class="form-notu">Yurt dışı numarası + ile yazılır (örn. +49 151 2345 6789). Silmek için boş bırakın.</p>
+      </div>
+      <div class="form-alt">
+        <span class="pencere-mesaji" role="alert"></span>
+        <button class="dugme vazgec" type="button">Vazgeç</button>
+        <button class="dugme birincil" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="hatirlatici-penceresi">
+    <form id="hatirlatici-formu" class="bilgi-formu" novalidate>
+      <h2>Hatırlatıcı</h2>
+      <p id="hatirlatici-hasta" class="form-notu"></p>
+      <div class="alanlar">
+        <label>Konu
+          <input name="konu" required autocomplete="off" list="tedavi-onerileri" placeholder="Örn. İmplant kontrolü">
+        </label>
+        <label>Tarih
+          <input name="tarih" type="date" required>
+        </label>
+        <div class="hizli-tarih" aria-label="Bugünden itibaren">
+          <button class="dugme kucuk" type="button" data-gun="7">1 hafta</button>
+          <button class="dugme kucuk" type="button" data-gun="14">2 hafta</button>
+          <button class="dugme kucuk" type="button" data-ay="1">1 ay</button>
+          <button class="dugme kucuk" type="button" data-ay="3">3 ay</button>
+          <button class="dugme kucuk" type="button" data-ay="6">6 ay</button>
+          <button class="dugme kucuk" type="button" data-ay="12">1 yıl</button>
+        </div>
+        <label>Not
+          <input name="not" autocomplete="off" placeholder="Örn. Geçici dolgu yapıldı">
+        </label>
+        <label class="beni-hatirla">
+          <input name="tamamlandi" type="checkbox">
+          Tamamlandı (hasta geldi)
+        </label>
+      </div>
+      <div class="form-alt">
+        <span class="pencere-mesaji" role="alert"></span>
+        <button class="dugme vazgec" type="button">Vazgeç</button>
+        <button class="dugme birincil" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
   <datalist id="tedavi-onerileri"></datalist>
   <datalist id="doktor-onerileri"></datalist>
 
@@ -383,6 +479,7 @@
   <script src="pencereler.js"></script>
   <script src="hastalar.js"></script>
   <script src="hesap.js"></script>
+  <script src="hatirlaticilar.js"></script>
   <script src="kasa.js"></script>
   <script src="raporlar.js"></script>
   <script src="fiyatlar.js"></script>

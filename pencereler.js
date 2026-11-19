@@ -300,3 +300,116 @@ async function onaylaVeSil(koleksiyon, kayit, soru) {
     if (!genelHatayiIsle(hata) && hata.message !== "oturum yok") bildir(`Silinemedi: ${hata.message}`);
   }
 }
+
+/* Telefon (iletisim tablosu) */
+
+let telefonBaglami = null; // { hastaId }
+
+const telefon = pencereKur(document.getElementById("telefon-penceresi"), {
+  alanAdlari: { telefon: "Telefon", hasta: "Hasta" },
+  async kaydet(form) {
+    const { hastaId } = telefonBaglami;
+    const numara = telefonOku(form.elements.telefon.value);
+    if (numara === null) throw "Numara geçersiz. Örnek: 0532 123 45 67 ya da +49 151 2345 6789";
+    const mevcut = iletisimBul(hastaId);
+    if (!numara) {
+      if (mevcut) await sil("iletisim", mevcut.id);
+      return;
+    }
+    if (mevcut && mevcut.telefon === numara) return;
+    await benzersizKaydet("iletisim", mevcut?.id, mevcut ? { telefon: numara } : { hasta: hastaId, telefon: numara },
+      "Bu hastanın telefonu az önce başka bir bilgisayarda girildi. Ekran güncellendi; numarayı kontrol edip tekrar kaydedin.");
+  },
+});
+
+function telefonPenceresiniAc(hastaId) {
+  telefonBaglami = { hastaId };
+  telefon.form.reset();
+  telefon.form.elements.telefon.value = telefonGoster(telefonu(hastaId));
+  const hasta = hastaBul(hastaId);
+  telefon.ac(`Telefon${hasta ? ` · ${tamAd(hasta)}` : ""}`);
+  telefon.form.elements.telefon.focus();
+}
+
+/* Hatırlatıcı */
+
+let hatirlaticiBaglami = null; // { hastaId, islem, kayit }
+
+function tarihtenSonra(gun, ay) {
+  const d = new Date();
+  if (ay) {
+    const gunu = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + ay);
+    d.setDate(Math.min(gunu, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+  }
+  if (gun) d.setDate(d.getDate() + gun);
+  return tarihMetni(d);
+}
+
+const hatirlatici = pencereKur(document.getElementById("hatirlatici-penceresi"), {
+  alanAdlari: { konu: "Konu", tarih: "Tarih", hasta: "Hasta" },
+  async kaydet(form) {
+    const { hastaId, islem, kayit } = hatirlaticiBaglami;
+    const e = form.elements;
+    const konu = e.konu.value.trim();
+    if (!konu) throw "Konuyu yazın.";
+    const tamamlandi = e.tamamlandi.checked;
+    const alanlar = {
+      konu,
+      tarih: tarihOku(e.tarih),
+      not: e.not.value.trim(),
+      tamamlandi,
+      tamamlanmaTarihi: tamamlandi ? (kayit?.tamamlanmaTarihi || bugununTarihi()) : "",
+    };
+    if (!kayit) Object.assign(alanlar, { hasta: hastaId, islemId: islem ? islem.id : "" });
+    await kaydet("hatirlaticilar", kayit?.id, alanlar);
+  },
+});
+
+document.querySelectorAll("#hatirlatici-formu .hizli-tarih button").forEach((d) => d.addEventListener("click", () => {
+  hatirlatici.form.elements.tarih.value = tarihtenSonra(Number(d.dataset.gun || 0), Number(d.dataset.ay || 0));
+  document.getElementById("hatirlatici-penceresi").dataset.degisti = "1";
+}));
+
+// islem: paneldeki planlanan işlem (konu ondan gelir), kayit: düzeltilecek hatırlatıcı
+function hatirlaticiPenceresiniAc({ hastaId, islem = null, kayit = null }) {
+  hatirlaticiBaglami = { hastaId, islem, kayit };
+  onerileriDoldur();
+  const e = hatirlatici.form.elements;
+  hatirlatici.form.reset();
+  if (kayit) {
+    e.konu.value = kayit.konu;
+    e.tarih.value = kayit.tarih;
+    e.not.value = kayit.not || "";
+    e.tamamlandi.checked = !!kayit.tamamlandi;
+  } else {
+    e.konu.value = islem ? islem.tedavi + ((islem.disler || []).length ? ` (${islem.disler.join(", ")})` : "") : "";
+    e.tarih.value = tarihtenSonra(7, 0);
+  }
+  const hasta = hastaBul(hastaId);
+  document.getElementById("hatirlatici-hasta").textContent = hasta
+    ? `${tamAd(hasta)} · Hasta No ${hasta.hastaNo ?? "-"}${telefonu(hastaId) ? ` · ${telefonGoster(telefonu(hastaId))}` : " · telefon girilmemiş"}`
+    : "";
+  hatirlatici.ac(kayit ? "Hatırlatıcıyı Düzelt" : "Hatırlatıcı Ekle");
+  (e.konu.value ? e.tarih : e.konu).focus();
+}
+
+// Hatırlatıcıyı tek tıkla tamamlandı yapar ya da geri alır
+async function hatirlaticiDurumu(kayit, tamamlandi) {
+  try {
+    await kaydet("hatirlaticilar", kayit.id, { tamamlandi, tamamlanmaTarihi: tamamlandi ? bugununTarihi() : "" });
+  } catch (hata) {
+    if (!genelHatayiIsle(hata) && hata.message !== "oturum yok") bildir(sunucuHatasiMetni(hata));
+  }
+}
+
+// Hatırlatıcı için hazır WhatsApp mesajı
+function hatirlaticiMesaji(kayit) {
+  const hasta = hastaBul(kayit.hasta);
+  const ad = hasta ? tamAd(hasta) : "";
+  const zaman = kayit.tarih <= bugununTarihi()
+    ? `${kayit.konu} için kontrol zamanınız geldi.`
+    : `${kayit.konu} için ${tarihGoster(kayit.tarih)} tarihinde kliniğimize gelmeniz gerekiyor.`;
+  return `Merhaba ${ad}, Alpotech Klinik'ten yazıyoruz. ${zaman} Size uygun gün ve saati yazar mısınız?`;
+}
