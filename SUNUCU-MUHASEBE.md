@@ -312,7 +312,7 @@ migrate((app) => {
 ## 7. Laptop tarafında bekleyenler
 
 - Kullanıcı isterse klinik paneline "Muhasebe" bağlantısı (`/muhasebe/`) eklenecek. Bu, `Klinik_app` deposunda ayrı bir değişikliktir.
-- Kullanıcı isterse kurulum betiğine ikinci bir masaüstü simgesi (Alpotech Muhasebe) eklenecek.
+- ~~Kurulum betiğine muhasebe simgesi~~ yapıldı: `kurulum/Alpotech_Muhasebe_Kurulum.bat`. Masaüstüne "Alpotech Muhasebe" ve "Alpotech Klinik ve Muhasebe" (yan yana) simgelerini koyar. Sunucuya kopyalanmaz, klinik bilgisayarlarında elle çalıştırılır.
 
 ## 8. Sunucu tarafı: cevap (2026-11-19)
 

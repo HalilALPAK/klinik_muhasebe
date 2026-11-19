@@ -26,6 +26,23 @@ Klinik panelinden ([Klinik_app](https://github.com/HalilALPAK/Klinik_app)) ayrı
 - **Sunucu kapalıysa:** Kırmızı bant çıkar ve kayıt yapılmaz. Pencere açık kalır, yazılan kaybolmaz; bağlantı gelince tekrar "Kaydet"e basılır.
 - **Yetki:** Rol ayrımı yok. Doktor ve sekreter her ekranı görür, her kaydı ekler, düzeltir ve siler; silmeden önce onay sorulur.
 
+## Klinik bilgisayarında açma
+
+Tek dosya olan `kurulum/Alpotech_Muhasebe_Kurulum.bat`'ı bilgisayara kopyalayıp çift tıklayın. Sunucu adresi önerilir: doğruysa Enter'a basın, değiştiyse yeni adresi yazın.
+
+**Dosyanın yaptıkları**
+- Sunucuya ulaşıldığını ve muhasebenin yayında olduğunu (`/muhasebe/`) sınar. Değilse ne yapılacağını yazar.
+- Masaüstüne ve Başlat menüsüne iki simge koyar:
+  - **Alpotech Muhasebe:** yalnızca muhasebeyi açar.
+  - **Alpotech Klinik ve Muhasebe:** ekranı ikiye bölüp solda klinik panelini, sağda muhasebeyi açar. İkisi arasındaki veri geçişini birlikte izlemek için kullanılır.
+- Kurulum bitince ikisini yan yana açar.
+
+**Ayrıntılar**
+- **Pencere:** Edge (yoksa Chrome) `--app` kipinde açılır; adres çubuğu yoktur, program gibi ayrı bir penceredir.
+- **Adres:** Klinik paneli kurulumuyla aynı adres dosyasını kullanır: `%LOCALAPPDATA%\AlpotechKlinikdres.txt`. Yan yana açıcı da bu klasörde (`yan_yana.ps1`) durur.
+- **Simge:** Klinik logosunun sağ altında ₺ rozeti vardır; panel simgesinden böyle ayrılır.
+- **Oturum:** İki pencere aynı tarayıcı profilini kullanır. Birinde giriş yapınca diğeri de girişli olur.
+
 ## Para ve hesaplama
 
 - **Tutarlar** sunucuda **kuruş cinsinden tam sayı** olarak saklanır. Ekranda `1.250,50 ₺` biçiminde gösterilir.
@@ -78,6 +95,7 @@ Klinik panelinden ([Klinik_app](https://github.com/HalilALPAK/Klinik_app)) ayrı
 | `hastalar.js` | Hasta hesapları listesi ve genel özet |
 | `hesap.js` | Bir hastanın hesabı: ücretlendirilmemiş işlemler, döküm, ekstre |
 | `kasa.js`, `raporlar.js`, `fiyatlar.js` | İlgili ekranlar |
+| `kurulum/Alpotech_Muhasebe_Kurulum.bat` | Klinik bilgisayarına muhasebe ve "yan yana" simgelerini kurar |
 | `uygulama.js` | Giriş, yönlendirme (`#`, `#hasta/<id>`, `#hatirlaticilar`, `#kasa`, `#raporlar`, `#fiyatlar`), açılış. En son yüklenir |
 
 Derleme adımı yoktur. Betikler `index.html` sonundaki sırayla yüklenir ve ortak üst düzey adları paylaşır.
