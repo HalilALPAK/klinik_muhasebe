@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alpotech Muhasebe</title>
+  <link rel="icon" type="image/png" href="../logo.png">
+  <link rel="stylesheet" href="stil.css">
+</head>
+<body>
+  <div id="baglanti-bandi" class="baglanti-bandi" role="alert" hidden>
+    <span>Sunucuya bağlanılamıyor. Yazdıklarınız kaybolmaz; bağlantı gelince tekrar kaydedin.</span>
+    <button id="baglanti-tekrar" class="dugme" type="button">Tekrar dene</button>
+  </div>
+  <div id="bildirim" class="bildirim" role="status" hidden></div>
+
+  <!-- Giriş -->
+  <section id="giris-sayfasi" class="sayfa" hidden>
+    <header class="ana-baslik">
+      <div class="logo-cerceve">
+        <img src="../logo.png" alt="Alpotech Şirketler Grubu">
+      </div>
+    </header>
+    <form id="giris-formu" class="kart bilgi-formu giris-karti">
+      <h1>Muhasebe Girişi</h1>
+      <div class="alanlar">
+        <label>E-posta
+          <input name="eposta" type="email" required autocomplete="username">
+        </label>
+        <label>Şifre
+          <input name="sifre" type="password" required autocomplete="current-password">
+        </label>
+        <label class="beni-hatirla">
+          <input name="beniHatirla" type="checkbox" checked>
+          Beni hatırla
+        </label>
+      </div>
+      <div class="form-alt">
+        <span id="giris-mesaji" class="giris-mesaji" role="status"></span>
+        <button class="dugme birincil" type="submit">Giriş Yap</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Girişten sonra: üst menü ve ekranlar -->
+  <div id="uygulama" hidden>
+    <header class="ust-cubuk">
+      <div class="marka">
+        <img src="../logo.png" alt="">
+        <span>Alpotech Muhasebe</span>
+      </div>
+      <nav class="ana-menu" aria-label="Muhasebe ekranları">
+        <a href="#" data-menu="hastalar">Hastalar</a>
+        <a href="#kasa" data-menu="kasa">Kasa / Gider</a>
+        <a href="#raporlar" data-menu="raporlar">Raporlar</a>
+        <a href="#fiyatlar" data-menu="fiyatlar">Fiyat Listesi</a>
+      </nav>
+      <div class="kullanici-cubugu">
+        <a class="dugme" href="../">Klinik Paneli</a>
+        <span id="kullanici-adi"></span>
+        <button id="cikis-dugmesi" class="dugme" type="button">Çıkış</button>
+      </div>
+    </header>
+
+    <!-- Hastalar ve bakiyeleri -->
+    <section id="hastalar-sayfasi" class="sayfa" hidden>
+      <div class="ozet-kutulari" id="genel-ozet"></div>
+      <div class="kart">
+        <div class="liste-arac">
+          <h1>Hasta Hesapları</h1>
+          <input id="hasta-arama" type="search" placeholder="Hasta No, isim, soyisim veya TC ile ara" aria-label="Hasta ara" autocomplete="off">
+          <label class="secenek"><input id="yalniz-borclular" type="checkbox"> Yalnızca borçlular</label>
+        </div>
+        <div class="tablo-kaydirma">
+          <table class="tablo tiklanir">
+            <thead>
+              <tr><th>Hasta No</th><th>Ad Soyad</th><th>TC Kimlik No</th><th class="sayi">Ücret</th><th class="sayi">Ödenen</th><th class="sayi">Kalan</th></tr>
+            </thead>
+            <tbody id="hasta-satirlari"></tbody>
+          </table>
+        </div>
+        <p id="hasta-bos" class="liste-bos" hidden></p>
+      </div>
+    </section>
+
+    <!-- Bir hastanın hesabı -->
+    <section id="hesap-sayfasi" class="sayfa" hidden>
+      <div class="sayfa-ust">
+        <a class="dugme yazdirma-gizli" href="#">← Hastalar</a>
+        <h1 id="hesap-basligi"></h1>
+        <span id="hesap-hasta-no" class="etiket"></span>
+        <span class="bosluk"></span>
+        <a id="hesap-panel-baglantisi" class="dugme yazdirma-gizli" href="../">Panelde aç</a>
+        <button id="hesap-yazdir" class="dugme yazdirma-gizli" type="button">Ekstre Yazdır</button>
+      </div>
+      <p class="yazdirma-baslik">Alpotech Klinik · Hesap Ekstresi · <span id="ekstre-tarihi"></span></p>
+      <div class="ozet-kutulari" id="hesap-ozeti"></div>
+
+      <section class="kart yazdirma-gizli" aria-labelledby="ucretsiz-baslik">
+        <div class="kart-baslik">
+          <h2 id="ucretsiz-baslik">Ücretlendirilmemiş İşlemler</h2>
+          <span class="kart-notu">Klinik panelindeki işlemlerden henüz ücret yazılmamış olanlar</span>
+        </div>
+        <div class="tablo-kaydirma">
+          <table class="tablo">
+            <thead>
+              <tr><th>Durum</th><th>Tarih</th><th>Tedavi</th><th>Dişler</th><th>Doktor</th><th class="sayi">Liste fiyatı</th><th><span class="ekran-disi">Ücretlendir</span></th></tr>
+            </thead>
+            <tbody id="ucretsiz-satirlari"></tbody>
+          </table>
+        </div>
+        <p id="ucretsiz-bos" class="liste-bos" hidden>Panelde ücretlendirilmemiş işlem yok.</p>
+        <p id="plan-ozeti" class="kart-alt" hidden></p>
+      </section>
+
+      <section class="kart" aria-labelledby="dokum-baslik">
+        <div class="kart-baslik">
+          <h2 id="dokum-baslik">Hesap Dökümü</h2>
+          <span class="bosluk"></span>
+          <button id="ucret-ekle" class="dugme yazdirma-gizli" type="button">+ Ücret Ekle</button>
+          <button id="odeme-al" class="dugme birincil yazdirma-gizli" type="button">+ Ödeme Al</button>
+        </div>
+        <div class="tablo-kaydirma">
+          <table class="tablo">
+            <thead>
+              <tr><th>Tarih</th><th>Açıklama</th><th class="sayi">Ücret</th><th class="sayi">Ödeme</th><th class="sayi">Bakiye</th><th class="yazdirma-gizli"><span class="ekran-disi">Düzelt / Sil</span></th></tr>
+            </thead>
+            <tbody id="dokum-satirlari"></tbody>
+          </table>
+        </div>
+        <p id="dokum-bos" class="liste-bos" hidden>Bu hastanın hesabında hareket yok.</p>
+      </section>
+    </section>
+
+    <!-- Kasa ve giderler -->
+    <section id="kasa-sayfasi" class="sayfa" hidden>
+      <div class="sayfa-ust">
+        <h1>Günlük Kasa</h1>
+        <button id="kasa-onceki" class="dugme" type="button" aria-label="Önceki gün">←</button>
+        <input id="kasa-tarihi" type="date" aria-label="Gün">
+        <button id="kasa-sonraki" class="dugme" type="button" aria-label="Sonraki gün">→</button>
+        <button id="kasa-bugun" class="dugme" type="button">Bugün</button>
+        <span class="bosluk"></span>
+        <button id="gider-ekle" class="dugme birincil" type="button">+ Gider Ekle</button>
+      </div>
+      <div class="ozet-kutulari" id="kasa-ozeti"></div>
+      <div class="iki-sutun">
+        <section class="kart" aria-labelledby="kasa-tahsilat-baslik">
+          <div class="kart-baslik"><h2 id="kasa-tahsilat-baslik">Tahsilatlar</h2></div>
+          <div class="tablo-kaydirma">
+            <table class="tablo">
+              <thead><tr><th>Hasta</th><th>Yöntem</th><th>Açıklama</th><th class="sayi">Tutar</th></tr></thead>
+              <tbody id="kasa-tahsilat-satirlari"></tbody>
+            </table>
+          </div>
+          <p id="kasa-tahsilat-bos" class="liste-bos" hidden>Bu gün tahsilat yok.</p>
+        </section>
+        <section class="kart" aria-labelledby="kasa-gider-baslik">
+          <div class="kart-baslik"><h2 id="kasa-gider-baslik">Giderler</h2></div>
+          <div class="tablo-kaydirma">
+            <table class="tablo">
+              <thead><tr><th>Kategori</th><th>Yöntem</th><th>Açıklama</th><th class="sayi">Tutar</th><th><span class="ekran-disi">Düzelt / Sil</span></th></tr></thead>
+              <tbody id="kasa-gider-satirlari"></tbody>
+            </table>
+          </div>
+          <p id="kasa-gider-bos" class="liste-bos" hidden>Bu gün gider yok.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- Raporlar -->
+    <section id="raporlar-sayfasi" class="sayfa" hidden>
+      <div class="sayfa-ust">
+        <h1>Raporlar</h1>
+        <select id="rapor-donemi" aria-label="Dönem">
+          <option value="bugun">Bugün</option>
+          <option value="buAy" selected>Bu ay</option>
+          <option value="gecenAy">Geçen ay</option>
+          <option value="buYil">Bu yıl</option>
+          <option value="ozel">Özel aralık</option>
+        </select>
+        <span id="rapor-ozel" class="tarih-araligi" hidden>
+          <input id="rapor-baslangic" type="date" aria-label="Başlangıç">
+          <span>–</span>
+          <input id="rapor-bitis" type="date" aria-label="Bitiş">
+        </span>
+        <span class="bosluk"></span>
+        <button id="rapor-yazdir" class="dugme yazdirma-gizli" type="button">Yazdır</button>
+      </div>
+      <p class="yazdirma-baslik">Alpotech Klinik · Rapor · <span id="rapor-aralik-yazisi"></span></p>
+      <div class="ozet-kutulari" id="rapor-ozeti"></div>
+      <div class="uc-sutun">
+        <section class="kart"><div class="kart-baslik"><h2>Tahsilat (yönteme göre)</h2></div><div id="rapor-yontem"></div></section>
+        <section class="kart"><div class="kart-baslik"><h2>Ücretlendirme (doktora göre)</h2></div><div id="rapor-doktor"></div></section>
+        <section class="kart"><div class="kart-baslik"><h2>Gider (kategoriye göre)</h2></div><div id="rapor-kategori"></div></section>
+      </div>
+      <section class="kart">
+        <div class="kart-baslik">
+          <h2>Aylık Özet</h2>
+          <select id="rapor-yili" aria-label="Yıl"></select>
+        </div>
+        <div class="tablo-kaydirma">
+          <table class="tablo">
+            <thead><tr><th>Ay</th><th class="sayi">Ücretlendirme</th><th class="sayi">Tahsilat</th><th class="sayi">Gider</th><th class="sayi">Net (tahsilat − gider)</th></tr></thead>
+            <tbody id="aylik-satirlari"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="kart">
+        <div class="kart-baslik">
+          <h2>Borçlu Hastalar</h2>
+          <span class="kart-notu">Bugünkü durum, dönemden bağımsız</span>
+        </div>
+        <div class="tablo-kaydirma">
+          <table class="tablo tiklanir">
+            <thead><tr><th>Hasta No</th><th>Ad Soyad</th><th>Son ödeme</th><th class="sayi">Kalan</th></tr></thead>
+            <tbody id="borclu-satirlari"></tbody>
+          </table>
+        </div>
+        <p id="borclu-bos" class="liste-bos" hidden>Borçlu hasta yok.</p>
+      </section>
+    </section>
+
+    <!-- Fiyat listesi -->
+    <section id="fiyatlar-sayfasi" class="sayfa" hidden>
+      <div class="sayfa-ust">
+        <h1>Fiyat Listesi</h1>
+        <input id="fiyat-arama" type="search" placeholder="Tedavi ara" aria-label="Tedavi ara" autocomplete="off">
+        <label class="secenek"><input id="pasifleri-goster" type="checkbox"> Pasifleri göster</label>
+        <span class="bosluk"></span>
+        <button id="fiyat-ekle" class="dugme birincil" type="button">+ Fiyat Ekle</button>
+      </div>
+      <div class="iki-sutun genis-sol">
+        <section class="kart">
+          <div class="tablo-kaydirma">
+            <table class="tablo">
+              <thead><tr><th>Tedavi</th><th class="sayi">Fiyat (diş başına)</th><th>Durum</th><th><span class="ekran-disi">Düzelt / Sil</span></th></tr></thead>
+              <tbody id="fiyat-satirlari"></tbody>
+            </table>
+          </div>
+          <p id="fiyat-bos" class="liste-bos" hidden></p>
+        </section>
+        <section class="kart">
+          <div class="kart-baslik">
+            <h2>Fiyatı Olmayan Tedaviler</h2>
+          </div>
+          <p class="kart-notu kart-ic">Klinik panelinde kullanılmış ama listede fiyatı olmayan tedavi adları.</p>
+          <ul id="fiyatsiz-tedaviler" class="oneri-kutulari"></ul>
+          <p id="fiyatsiz-bos" class="liste-bos" hidden>Hepsinin fiyatı var.</p>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <!-- Pencereler -->
+  <dialog id="ucret-penceresi">
+    <form id="ucret-formu" class="bilgi-formu" novalidate>
+      <h2 id="ucret-basligi">Ücret</h2>
+      <p id="ucret-islem" class="form-notu" hidden></p>
+      <div class="alanlar">
+        <label>Tarih
+          <input name="tarih" type="date" required>
+        </label>
+        <label>Açıklama
+          <input name="aciklama" required autocomplete="off" list="tedavi-onerileri">
+        </label>
+        <label>Doktor
+          <input name="doktor" autocomplete="off" list="doktor-onerileri">
+        </label>
+        <div class="alan-uclu">
+          <label>Adet
+            <input name="adet" type="number" min="1" step="1" value="1" inputmode="numeric">
+          </label>
+          <label>Birim fiyat (₺)
+            <input name="birim" inputmode="decimal" autocomplete="off" placeholder="0,00">
+          </label>
+          <label>Tutar (₺)
+            <input name="tutar" required inputmode="decimal" autocomplete="off" placeholder="0,00">
+          </label>
+        </div>
+        <label>İndirim (₺)
+          <input name="indirim" inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </label>
+        <p class="form-notu">Hastaya yazılacak: <strong id="ucret-net">0,00 ₺</strong></p>
+      </div>
+      <div class="form-alt">
+        <span class="pencere-mesaji" role="alert"></span>
+        <button class="dugme vazgec" type="button">Vazgeç</button>
+        <button class="dugme birincil" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="odeme-penceresi">
+    <form id="odeme-formu" class="bilgi-formu" novalidate>
+      <h2 id="odeme-basligi">Ödeme</h2>
+      <div class="alanlar">
+        <label>Tarih
+          <input name="tarih" type="date" required>
+        </label>
+        <label>Tutar (₺)
+          <input name="tutar" required inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </label>
+        <fieldset class="secim-grubu">
+          <legend>Yöntem</legend>
+          <label><input type="radio" name="yontem" value="nakit" checked> Nakit</label>
+          <label><input type="radio" name="yontem" value="kart"> Kart</label>
+          <label><input type="radio" name="yontem" value="havale"> Havale / EFT</label>
+        </fieldset>
+        <label>Açıklama
+          <input name="aciklama" autocomplete="off" placeholder="Örn. 2. taksit">
+        </label>
+      </div>
+      <div class="form-alt">
+        <span class="pencere-mesaji" role="alert"></span>
+        <button class="dugme vazgec" type="button">Vazgeç</button>
+        <button class="dugme birincil" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="gider-penceresi">
+    <form id="gider-formu" class="bilgi-formu" novalidate>
+      <h2 id="gider-basligi">Gider</h2>
+      <div class="alanlar">
+        <label>Tarih
+          <input name="tarih" type="date" required>
+        </label>
+        <label>Kategori
+          <select name="kategori" required></select>
+        </label>
+        <label>Tutar (₺)
+          <input name="tutar" required inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </label>
+        <fieldset class="secim-grubu">
+          <legend>Yöntem</legend>
+          <label><input type="radio" name="yontem" value="nakit" checked> Nakit</label>
+          <label><input type="radio" name="yontem" value="kart"> Kart</label>
+          <label><input type="radio" name="yontem" value="havale"> Havale / EFT</label>
+        </fieldset>
+        <label>Açıklama
+          <input name="aciklama" autocomplete="off" placeholder="Örn. Ekim kirası, kompozit malzeme">
+        </label>
+      </div>
+      <div class="form-alt">
+        <span class="pencere-mesaji" role="alert"></span>
+        <button class="dugme vazgec" type="button">Vazgeç</button>
+        <button class="dugme birincil" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="fiyat-penceresi">
+    <form id="fiyat-formu" class="bilgi-formu" novalidate>
+      <h2 id="fiyat-basligi">Fiyat</h2>
+      <div class="alanlar">
+        <label>Tedavi adı
+          <input name="tedavi" required autocomplete="off" list="tedavi-onerileri">
+        </label>
+        <label>Fiyat (₺, diş başına)
+          <input name="fiyat" required inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </label>
+        <label class="beni-hatirla">
+          <input name="aktif" type="checkbox" checked>
+          Aktif (ücretlendirirken önerilir)
+        </label>
+      </div>
+      <div class="form-alt">
+        <span class="pencere-mesaji" role="alert"></span>
+        <button class="dugme vazgec" type="button">Vazgeç</button>
+        <button class="dugme birincil" type="submit">Kaydet</button>
+      </div>
+    </form>
+  </dialog>
+
+  <datalist id="tedavi-onerileri"></datalist>
+  <datalist id="doktor-onerileri"></datalist>
+
+  <script src="vendor/pocketbase.umd.js"></script>
+  <script src="sunucu.js"></script>
+  <script src="ortak.js"></script>
+  <script src="veri.js"></script>
+  <script src="pencereler.js"></script>
+  <script src="hastalar.js"></script>
+  <script src="hesap.js"></script>
+  <script src="kasa.js"></script>
+  <script src="raporlar.js"></script>
+  <script src="fiyatlar.js"></script>
+  <script src="uygulama.js"></script>
+</body>
+</html>
