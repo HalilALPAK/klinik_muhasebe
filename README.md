@@ -50,6 +50,7 @@ Klinik panelinden ([Klinik_app](https://github.com/HalilALPAK/Klinik_app)) ayrı
 - **Nerede:** Hasta listesindeki, hasta hesabının başlığındaki ve her hatırlatıcıdaki yeşil simge.
 - **Ne yapar:** Hastanın sohbetini `wa.me` ile yeni pencerede açar.
   - Hatırlatıcıdan açılınca mesaj hazır yazılı gelir; gönderilmeden önce değiştirilebilir. Otomatik gönderim yok.
+  - KVKK gereği mesajda tedavi adı ve not geçmez, yalnızca ad ve kontrol tarihi geçer: "Merhaba …, Alpotech Klinik'ten yazıyoruz. Kontrol zamanınız geldi. Size uygun gün ve saati yazar mısınız?"
   - Telefonu girilmemiş hastada simge gridir; tıklanınca telefon penceresi açılır.
 - **Gerekenler:** Tıklanan bilgisayarda internet ve kliniğin numarasıyla girişli WhatsApp (masaüstü ya da Web) olmalı.
 

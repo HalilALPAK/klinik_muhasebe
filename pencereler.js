@@ -404,12 +404,15 @@ async function hatirlaticiDurumu(kayit, tamamlandi) {
   }
 }
 
-// Hatırlatıcı için hazır WhatsApp mesajı
+/*
+ * Hatırlatıcı için hazır WhatsApp mesajı. KVKK: tedavi adı (konu) ve not sağlık verisidir,
+ * mesaja girmez; WhatsApp'a yalnızca ad ve kontrol tarihi gider (SUNUCU-MUHASEBE.md §8).
+ */
 function hatirlaticiMesaji(kayit) {
   const hasta = hastaBul(kayit.hasta);
   const ad = hasta ? tamAd(hasta) : "";
   const zaman = kayit.tarih <= bugununTarihi()
-    ? `${kayit.konu} için kontrol zamanınız geldi.`
-    : `${kayit.konu} için ${tarihGoster(kayit.tarih)} tarihinde kliniğimize gelmeniz gerekiyor.`;
+    ? "Kontrol zamanınız geldi."
+    : `${tarihGoster(kayit.tarih)} tarihinde kontrol zamanınız geliyor.`;
   return `Merhaba ${ad}, Alpotech Klinik'ten yazıyoruz. ${zaman} Size uygun gün ve saati yazar mısınız?`;
 }
